@@ -4,6 +4,6 @@
   "version": "1.0.0",
   "type": "commonjs",
   "dependencies": {
-    "stripe": "^16.0.0"
+    "stripe": "^16.12.0"
   }
 }
