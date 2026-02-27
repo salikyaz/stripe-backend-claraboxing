@@ -52,6 +52,8 @@
 
 
 
+// create-checkout-session.js
+
 const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -83,38 +85,16 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Find existing customer by email (or create new)
-    const existing = await stripe.customers.list({
-      email: memberEmail,
-      limit: 1,
-    });
-
-    let customer;
-    if (existing.data.length > 0) {
-      customer = await stripe.customers.update(existing.data[0].id, {
-        email: memberEmail,
-        // Keep Stripe Customer name as the member name (your choice)
-        name: memberName,
-        metadata: {
-          member_name: memberName,
-          member_email: memberEmail,
-        },
-      });
-    } else {
-      customer = await stripe.customers.create({
-        email: memberEmail,
-        name: memberName,
-        metadata: {
-          member_name: memberName,
-          member_email: memberEmail,
-        },
-      });
-    }
-
+    // ✅ Do NOT create a Customer upfront.
+    // ✅ Let Stripe Checkout create the Customer during the payment flow (on successful completion),
+    // especially in subscription mode unless an existing customer is provided.
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      customer: customer.id,
+
       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+
+      // ✅ Prefill email in Checkout; this will be used when Stripe creates the Customer
+      customer_email: memberEmail,
 
       // ✅ Ask for billing address
       billing_address_collection: "required",
@@ -122,7 +102,7 @@ module.exports = async (req, res) => {
       // ✅ Turn on phone collection inside Stripe Checkout
       phone_number_collection: { enabled: true },
 
-      // ✅ Remove phone from metadata (only keep member name/email)
+      // ✅ Keep member name/email in metadata (Customer will be created by Stripe at completion)
       metadata: {
         member_name: memberName,
         member_email: memberEmail,
