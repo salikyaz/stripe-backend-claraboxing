@@ -52,9 +52,82 @@
 
 
 
-// create-checkout-session.js
+  // create-checkout-session.js
 
-const Stripe = require("stripe");
+  // const Stripe = require("stripe");
+  // const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+  // const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
+  //   .split(",")
+  //   .map((s) => s.trim())
+  //   .filter(Boolean);
+
+  // module.exports = async (req, res) => {
+  //   const origin = req.headers.origin;
+
+  //   // --- CORS ---
+  //   if (origin && allowedOrigins.includes(origin)) {
+  //     res.setHeader("Access-Control-Allow-Origin", origin);
+  //     res.setHeader("Vary", "Origin");
+  //   }
+  //   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  //   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  //   if (req.method === "OPTIONS") return res.status(200).end();
+  //   if (req.method !== "POST") {
+  //     return res.status(405).json({ error: "Method Not Allowed" });
+  //   }
+
+  //   try {
+  //     const { memberEmail, memberName } = req.body;
+
+  //     if (!memberEmail || !memberName) {
+  //       return res.status(400).json({ error: "Missing required fields" });
+  //     }
+
+  //     // ✅ Do NOT create a Customer upfront.
+  //     // ✅ Let Stripe Checkout create the Customer during the payment flow (on successful completion),
+  //     // especially in subscription mode unless an existing customer is provided.
+  //     const session = await stripe.checkout.sessions.create({
+  //       mode: "subscription",
+
+  //       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
+
+  //       // ✅ Prefill email in Checkout; this will be used when Stripe creates the Customer
+  //       customer_email: memberEmail,
+
+  //       // ✅ Ask for billing address
+  //       billing_address_collection: "required",
+
+  //       // ✅ Turn on phone collection inside Stripe Checkout
+  //       phone_number_collection: { enabled: true },
+
+  //       // ✅ Keep member name/email in metadata (Customer will be created by Stripe at completion)
+  //       metadata: {
+  //         member_name: memberName,
+  //         member_email: memberEmail,
+  //       },
+
+  //       subscription_data: {
+  //         metadata: {
+  //           member_name: memberName,
+  //           member_email: memberEmail,
+  //         },
+  //       },
+
+  //       success_url: `${process.env.FRONTEND_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+  //       cancel_url: `${process.env.FRONTEND_URL}/cancel.html`,
+  //     });
+
+  //     return res.status(200).json({ url: session.url });
+  //   } catch (err) {
+  //     console.error("Stripe error:", err);
+  //     return res.status(500).json({ error: err.message });
+  //   }
+  // };
+
+
+  const Stripe = require("stripe");
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
@@ -85,36 +158,52 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // ✅ Do NOT create a Customer upfront.
-    // ✅ Let Stripe Checkout create the Customer during the payment flow (on successful completion),
-    // especially in subscription mode unless an existing customer is provided.
+    // Find existing customer by email or create a new one
+    const existing = await stripe.customers.list({
+      email: memberEmail,
+      limit: 1,
+    });
+
+    let customer;
+    if (existing.data.length > 0) {
+      // If customer exists, update their metadata
+      customer = await stripe.customers.update(existing.data[0].id, {
+        email: memberEmail,
+        name: memberName,
+        metadata: {
+          member_name: memberName,
+          
+        },
+      });
+    } else {
+      // If no existing customer, create a new customer
+      customer = await stripe.customers.create({
+        email: memberEmail,
+        name: memberName,
+        metadata: {
+          member_name: memberName,
+          
+        },
+      });
+    }
+
+    // Now create the checkout session, passing the customer ID
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-
+      customer: customer.id,  // Pass the created or updated customer ID
       line_items: [{ price: process.env.STRIPE_PRICE_ID, quantity: 1 }],
-
-      // ✅ Prefill email in Checkout; this will be used when Stripe creates the Customer
-      customer_email: memberEmail,
-
-      // ✅ Ask for billing address
       billing_address_collection: "required",
-
-      // ✅ Turn on phone collection inside Stripe Checkout
       phone_number_collection: { enabled: true },
-
-      // ✅ Keep member name/email in metadata (Customer will be created by Stripe at completion)
       metadata: {
         member_name: memberName,
         member_email: memberEmail,
       },
-
       subscription_data: {
         metadata: {
           member_name: memberName,
           member_email: memberEmail,
         },
       },
-
       success_url: `${process.env.FRONTEND_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel.html`,
     });
