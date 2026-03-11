@@ -64,7 +64,7 @@ async function handler(req, res) {
           </p>
 
           <p>
-            Your membership is officially active as of <strong>${startDate}</strong> and will automatically renew each month on the <strong>${billingDay}</strong>, based on your start date.
+            Your membership is officially active as of <strong>${startDate}</strong> and will automatically renew each month based on your start date.
           </p>
 
           <p>
@@ -89,9 +89,9 @@ async function handler(req, res) {
           <p>See you in the gym 🥊</p>
 
           <br/>
-          <br/>
+          
 
-          <p style="margin-top:40px;">
+          <p style="margin-top:20px;">
             <em>Founders</em><br/>
             <em>Rene & Michelle</em><br/>
             <strong>Clara Boxing Academy</strong>
@@ -105,7 +105,7 @@ Hi ${memberName},
 
 We’re excited to officially welcome you to Clara Boxing Academy! 🎉
 
-Your membership is officially active as of ${startDate} and will automatically renew each month on the ${billingDay}, based on your start date.
+Your membership is officially active as of ${startDate} and will automatically renew each month based on your start date.
 
 If you ever wish to cancel, please provide 7 days notice prior to your next billing date to ensure your membership is not processed for the upcoming charge.
 
