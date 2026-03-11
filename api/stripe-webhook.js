@@ -56,6 +56,7 @@ async function handler(req, res) {
 
       const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.7; color: #111;">
+          
           <p>Hi <strong>${memberName}</strong>,</p>
 
           <p>
@@ -87,14 +88,15 @@ async function handler(req, res) {
 
           <p>See you in the gym 🥊</p>
 
-          <br />
-          <br />
+          <br/>
+          <br/>
 
-          <p style="margin-top: 40px;">
-            <strong>Founders</strong><br />
-            <em>Rene & Michelle</em><br />
+          <p style="margin-top:40px;">
+            <em>Founders</em><br/>
+            <em>Rene & Michelle</em><br/>
             <strong>Clara Boxing Academy</strong>
           </p>
+
         </div>
       `;
 
