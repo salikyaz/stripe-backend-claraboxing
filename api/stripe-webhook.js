@@ -110,7 +110,7 @@ Your membership is officially active as of ${startDate} and will automatically r
 If you ever wish to cancel, please provide 7 days notice prior to your next billing date to ensure your membership is not processed for the upcoming charge.
 
 Notice may be submitted:
-- By email to claraboxingacademy@gmail.com
+- By email to info@claraboxingacademy.com
 - By text to (312) 885-5934
 
 If you have any questions about your membership or need support, we’re always here to help.
